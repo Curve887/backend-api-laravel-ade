@@ -40,4 +40,35 @@ class AuthController extends Controller
             'user' => $user
         ]);
     }
+
+    public function login(Request $request){
+           
+        // validasi input
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|string|email',
+            'password' => 'required|string|min:6',
+        ]);
+
+        if($validator->fails()) {
+            return response()->json([
+                'message' => 'Validasi error',
+                'error' => $validator->error()
+            ], 422);
+        }
+
+        // Cari user berdasarkan email
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user ||  !Hash::check($request->password, $user->password)) {
+            return response()->json([
+                'message' => 'Invalid email or password',
+            ], 401);
+        }
+        
+        return response()->json([
+           'message' => "Login berhasil",
+           'user' => $user 
+        ], 200);
+
+    }
 }
